@@ -11,24 +11,24 @@ import os
 
 USER_AGENT = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 DEFAULT_SIZE = (200, 200)
+FILL_COLOR = "#34495e"
 
 
 class ThumbnailManager:
-    def __init__(self, thumbnail_size: Optional[Tuple[int, int]] = DEFAULT_SIZE,
-                 cache_dir: Optional[str] = None):
+    def __init__(self, thumbnail_size: Optional[Tuple[int, int]] = DEFAULT_SIZE, cache_dir: Optional[str] = None):
         self.cache_dir = cache_dir
         self.thumbnail_size = thumbnail_size
 
-    def generate_thumbnail(self, image_url: str) -> Optional[str]:
+    def generate_thumbnail(self, image_url: str) -> str:
         headers = {'User-Agent': USER_AGENT}
 
         hash_id = hashlib.md5(image_url.encode("utf-8")).hexdigest()
 
         # List files that match the hash_id regardless of the extension in the cache directory
-        matching_files = [os.path.join(self.cache_dir, f) for f in os.listdir(self.cache_dir) if f.startswith(hash_id)]
+        matching_files = [f for f in os.listdir(self.cache_dir) if f.startswith(hash_id)]
         if matching_files:
             logging.debug(f"Thumbnail already exists for the image: {image_url}: {matching_files[0]}")
-            return os.path.join(self.cache_dir, matching_files[0])
+            return matching_files[0]
 
         try:
             img_request = urllib.request.Request(image_url, None, headers)
@@ -57,8 +57,9 @@ class ThumbnailManager:
             return None
 
         try:
-            thumbnail_file_name = os.path.join(self.cache_dir, hash_id + '.' + image.format.lower())
-            ImageOps.pad(image, self.thumbnail_size, color="#f00").save(fp=thumbnail_file_name)
+            thumbnail_file_name = hash_id + '.' + image.format.lower()
+            ImageOps.pad(image, self.thumbnail_size, color=FILL_COLOR).save(fp=os.path.join(self.cache_dir,
+                                                                                            thumbnail_file_name))
 
             # Delete the temporary file
             os.remove(tmp_file)
