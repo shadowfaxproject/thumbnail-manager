@@ -34,8 +34,7 @@ class ThumbnailManager:
             img_request = urllib.request.Request(image_url, None, headers)
             img_response = urllib.request.urlopen(img_request)
         except urllib.error.HTTPError as e:
-            logging.error(f"HTTP Error: {e.code}"
-                          f"Unable to download image from the URL: {image_url}")
+            logging.error(f"HTTP Error: {e.code}. Unable to download image from the URL: {image_url}")
             return None
 
         try:
