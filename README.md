@@ -1,4 +1,4 @@
-# thumbnail_manager
+# thumbnail-manager
 A package to generate and manage thumbnails for images.
 ### Features:
 - Generates thumbnail for an image url
@@ -7,18 +7,18 @@ A package to generate and manage thumbnails for images.
 
 ### Installation:
 ```bash
-git clone https://github.com/shadowfaxproject/thumbnail_manager.git
-cd thumbnail_manager
+git clone https://github.com/shadowfaxproject/thumbnail-manager.git
+cd thumbnail-manager
 pip install -r requirements.txt
 
-# Add thumbnail_manager to your PYTHONPATH to make it accessible
-export PYTHONPATH=$PYTHONPATH:/path/to/thumbnail_manager
+# Add thumbnail-manager to your PYTHONPATH to make it accessible
+export PYTHONPATH=$PYTHONPATH:/path/to/thumbnail-manager
 ```
 
 ### Usage:
 ```python
 import os
-from thumbnail_manager import ThumbnailManager
+from thumbnail-manager import ThumbnailManager
 
 image_url = 'https://picsum.photos/600/200'
 cache_dir = '/path/to/cache_dir'
