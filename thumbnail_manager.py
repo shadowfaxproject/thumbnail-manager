@@ -31,14 +31,21 @@ class ThumbnailManager:
         headers = {'User-Agent': USER_AGENT}
 
         hash_id = hashlib.md5(image_url.encode("utf-8")).hexdigest()
-
+        size = 'x'.join(map(str, self.thumbnail_size))
         if self.cache_dir:
-            # Check for match in the cache directory
+            # Check if the thumbnail already exists in the cache directory
+            matching_files = [f for f in os.listdir(self.cache_dir) if f.startswith('.'.join([hash_id, size]))]
+            if matching_files:
+                logging.debug(f"Thumbnail already exists for the image: {image_url}: {matching_files[0]}")
+                return os.path.join(self.cache_dir, matching_files[0])
+
+            # Check if the thumbnail already exists in the cache directory regardless of the size
             matching_files = [f for f in os.listdir(self.cache_dir) if f.startswith(hash_id)]
             if matching_files:
                 logging.debug(f"Thumbnail already exists for the image: {image_url}: {matching_files[0]}")
                 return os.path.join(self.cache_dir, matching_files[0])
 
+        # Fetch image from image_url
         try:
             img_request = urllib.request.Request(image_url, None, headers)
             img_response = urllib.request.urlopen(img_request)
@@ -46,6 +53,7 @@ class ThumbnailManager:
             logging.error(f"HTTP Error: {e.code}. Unable to download image from the URL: {image_url}")
             return None
 
+        # Save the image data to a temporary file
         try:
             data = img_response.read()
             tmp_file_name = 'tmp_' + hash_id
@@ -57,6 +65,7 @@ class ThumbnailManager:
             logging.error(f"File exists error: {e}. Unable to write image data to a temporary file.")
             return None
 
+        # Open the temporary image file
         try:
             image = Image.open(tmp_file)
         except FileNotFoundError as e:
@@ -64,8 +73,10 @@ class ThumbnailManager:
                           f"Unable to open the temporary image file.")
             return None
 
+        # Generate thumbnail
         try:
-            thumbnail_file_name = hash_id + '.' + image.format.lower()
+            thumbnail_file_name = '.'.join([hash_id, size, image.format.lower()])
+
             if not self.cache_dir:
                 # If cache directory is not provided then return the thumbnail saved as a temporary file in the TMP_DIR
                 thumbnail_file = os.path.join(TMP_DIR, thumbnail_file_name)
