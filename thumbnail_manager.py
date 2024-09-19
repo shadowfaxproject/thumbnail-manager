@@ -97,6 +97,9 @@ class ThumbnailManager:
             logging.error(f"File not found error: {e}"
                           f"Unable to open the temporary image file.")
             return None
+        except Exception as e:
+            logging.error(f"Error while opening the image file: {e}. Unable to open the image file.")
+            return None
 
         # Generate thumbnail
         try:
