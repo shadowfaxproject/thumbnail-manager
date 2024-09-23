@@ -20,15 +20,18 @@ THUMBNAILS_DIR = 'thumbnails'  # Directory-name to save the generated thumbnails
 
 class ThumbnailManager:
     def __init__(self, thumbnail_size: Optional[Tuple[int, int]] = DEFAULT_SIZE, cache_dir: Optional[str] = None,
-                 save_original: bool = False):
+                 save_original: bool = False, fill_color: str = FILL_COLOR):
         """
-        Initialize the ThumbnailManager object with the given thumbnail size and cache directory. :param
-        thumbnail_size: size of the thumbnail in pixels :param cache_dir: directory to save the generated thumbnails
+        Initialize the ThumbnailManager object with the given thumbnail size and cache directory.
+        :param thumbnail_size: size of the thumbnail in pixels :param cache_dir: directory to save the generated
+        thumbnails
         :param save_original: option to save original image in the cache directory. If True, the original image is
         saved under /original/ directory.
+        :param fill_color: color to fill the background with the thumbnail
         """
         self.thumbnail_size = thumbnail_size
         self.save_original = save_original
+        self.fill_color = fill_color
 
         self.thumbnails_dir = os.path.join(cache_dir, THUMBNAILS_DIR) if cache_dir else None
         self.originals_dir = os.path.join(cache_dir, ORIGINALS_DIR) if cache_dir else None
@@ -109,10 +112,10 @@ class ThumbnailManager:
             if not self.thumbnails_dir:
                 # If cache directory is not provided then return the thumbnail saved as a temporary file in the TMP_DIR
                 thumbnail_file = os.path.join(TMP_DIR, thumbnail_file_name)
-                ImageOps.pad(image, self.thumbnail_size, color=FILL_COLOR).save(fp=thumbnail_file)
+                ImageOps.pad(image, self.thumbnail_size, color=self.fill_color).save(fp=thumbnail_file)
                 return thumbnail_file
 
-            ImageOps.pad(image, self.thumbnail_size, color=FILL_COLOR).save(fp=os.path.join(self.thumbnails_dir,
+            ImageOps.pad(image, self.thumbnail_size, color=self.fill_color).save(fp=os.path.join(self.thumbnails_dir,
                                                                                             thumbnail_file_name))
             # Delete if the original image is not required to be saved
             if not self.save_original:
