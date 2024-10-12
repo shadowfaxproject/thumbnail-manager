@@ -78,17 +78,13 @@ class ThumbnailManager:
             return None
 
         # Save the image data to a temporary file
+        data = img_response.read()
+        image_file = os.path.join(self.originals_dir, hash_id) if self.save_original else (
+            os.path.join(TMP_DIR, 'tmp_' + hash_id))
         try:
-            data = img_response.read()
-            if self.save_original:
-                image_file_name = hash_id
-                image_file = os.path.join(self.originals_dir, image_file_name)
-            else:
-                image_file_name = 'tmp_' + hash_id
-                image_file = os.path.join(TMP_DIR, image_file_name)
             with open(image_file, 'wb') as f:
                 f.write(data)
-            f.close()
+                f.close()
         except FileExistsError as e:
             logging.error(f"File exists error: {e}. Unable to write image data to a file {image_file}.")
             return None
@@ -115,8 +111,8 @@ class ThumbnailManager:
                 ImageOps.pad(image, self.thumbnail_size, color=self.fill_color).save(fp=thumbnail_file)
                 return thumbnail_file
 
-            ImageOps.pad(image, self.thumbnail_size, color=self.fill_color).save(fp=os.path.join(self.thumbnails_dir,
-                                                                                            thumbnail_file_name))
+            ImageOps.pad(image, self.thumbnail_size, color=self.fill_color).save(
+                fp=os.path.join(self.thumbnails_dir, thumbnail_file_name))
             # Delete if the original image is not required to be saved
             if not self.save_original:
                 os.remove(image_file)
