@@ -35,6 +35,7 @@ class ThumbnailManager:
 
         self.thumbnails_dir = os.path.join(cache_dir, THUMBNAILS_DIR) if cache_dir else None
         self.originals_dir = os.path.join(cache_dir, ORIGINALS_DIR) if cache_dir else None
+        self.file_names = {}
 
         if self.thumbnails_dir:
             try:
@@ -44,6 +45,13 @@ class ThumbnailManager:
             except Exception as e:
                 raise Exception(f"ThumbnailManager: Error while creating cache directory: {e}. Unable to create cache "
                                 f"directory for saving thumbnails.")
+
+            # load all file-names-hashids in hashmap
+            for filename in os.listdir(self.thumbnails_dir):
+                (hash_id, size, ext) = filename.split('.')
+                self.file_names[hash_id] = filename
+            logging.info(f"ThumbnailManager: Cache directory: {self.thumbnails_dir}, "
+                         f"Originals directory: {self.originals_dir}")
 
     def generate_thumbnail(self, image_url: str) -> Optional[str]:
         """
@@ -58,16 +66,9 @@ class ThumbnailManager:
         size = 'x'.join(map(str, self.thumbnail_size))
         if self.thumbnails_dir:
             # Check if the thumbnail already exists in the cache directory
-            matching_files = [f for f in os.listdir(self.thumbnails_dir) if f.startswith('.'.join([hash_id, size]))]
-            if matching_files:
-                logging.debug(f"Thumbnail already exists for the image: {image_url}: {matching_files[0]}")
-                return os.path.join(self.thumbnails_dir, matching_files[0])
-
-            # Check if the thumbnail already exists in the cache directory regardless of the size
-            matching_files = [f for f in os.listdir(self.thumbnails_dir) if f.startswith(hash_id)]
-            if matching_files:
-                logging.debug(f"Thumbnail already exists for the image: {image_url}: {matching_files[0]}")
-                return os.path.join(self.thumbnails_dir, matching_files[0])
+            if hash_id in self.file_names:
+                logging.debug(f"Thumbnail already exists for the image: {image_url}: {self.file_names[hash_id]}")
+                return os.path.join(self.thumbnails_dir, self.file_names[hash_id])
 
         # Fetch image from image_url
         try:
@@ -112,7 +113,7 @@ class ThumbnailManager:
                 return thumbnail_file
 
             ImageOps.pad(image, self.thumbnail_size, color=self.fill_color).save(
-                fp=os.path.join(self.thumbnails_dir, thumbnail_file_name))
+                    fp=os.path.join(self.thumbnails_dir, thumbnail_file_name))
             # Delete if the original image is not required to be saved
             if not self.save_original:
                 os.remove(image_file)
