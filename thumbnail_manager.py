@@ -48,8 +48,12 @@ class ThumbnailManager:
 
             # load all file-names-hashids in hashmap
             for filename in os.listdir(self.thumbnails_dir):
-                (hash_id, size, ext) = filename.split('.')
-                self.file_names[hash_id] = filename
+                try:
+                    (hash_id, size, ext) = filename.split('.')
+                    self.file_names[hash_id] = filename
+                except ValueError as e:
+                    logging.error(f"ThumbnailManager: Error while reading thumbnail file: {e}. Unable to read the "
+                                  f"thumbnail file: {filename}")
             logging.info(f"ThumbnailManager: Cache directory: {self.thumbnails_dir}, "
                          f"Originals directory: {self.originals_dir}")
 
