@@ -129,3 +129,41 @@ class ThumbnailManager:
         except Exception as e:
             logging.error(f"Error while generating thumbnail: {e}. Unable to generate thumbnail for the image.")
             return None
+
+    def get_original_image_file(self, image_url: str) -> Optional[str]:
+        """
+        Get the original image file saved in the cache directory for the given image URL.
+        :param image_url:
+        :return: absolute path of the original image file
+        """
+        hash_id = hashlib.md5(image_url.encode("utf-8")).hexdigest()
+        filename = self.file_names[hash_id]
+        (hash_id, size, ext) = filename.split('.')
+        orig_filename = os.path.join(self.originals_dir, '.'.join([hash_id, ext]))
+        if os.path.exists(orig_filename):
+            return orig_filename
+        return None
+
+    def remove_thumbnail(self, image_url: str, keep_orig: Optional[bool] = False) -> None:
+        """
+        Remove the thumbnail for the given image URL from the cache directory.
+        :param keep_orig: whether to keep the original image file. If True, the original image file is not removed.
+        Default is False.
+        :param image_url:
+        """
+        hash_id = hashlib.md5(image_url.encode("utf-8")).hexdigest()
+        if hash_id in self.file_names:
+            try:
+                thumbnail_file = os.path.join(self.thumbnails_dir, self.file_names[hash_id])
+                logging.debug(f"Removing thumbnail: {thumbnail_file}")
+                # os.remove(thumbnail_file)
+                if not keep_orig:
+                    (hash_id, size, ext) = self.file_names[hash_id].split('.')
+                    orig_file = os.path.join(self.originals_dir, '.'.join([hash_id, ext]))
+                    logging.debug(f"Removing original image: {orig_file}")
+                    # os.remove(orig_file)
+                del self.file_names[hash_id]
+            except FileNotFoundError as e:
+                logging.warning(f"File not found error: {e}. Unable to remove the thumbnail file.")
+            except Exception as e:
+                logging.error(f"Error while removing thumbnail: {e}. Unable to remove the thumbnail file.")
