@@ -66,14 +66,13 @@ class ThumbnailManager:
         """
         headers = {'User-Agent': USER_AGENT}
 
+        # Check if the thumbnail already exists in the cache directory
+        path = self.has_thumbnail(image_url)
+        if path:
+            return path
+
         hash_id = hashlib.md5(image_url.encode("utf-8")).hexdigest()
         size = 'x'.join(map(str, self.thumbnail_size))
-        if self.thumbnails_dir:
-            # Check if the thumbnail already exists in the cache directory
-            if hash_id in self.file_names:
-                logging.debug(f"Thumbnail already exists for the image: {image_url}: {self.file_names[hash_id]}")
-                return os.path.join(self.thumbnails_dir, self.file_names[hash_id])
-
         # Fetch image from image_url
         try:
             img_request = urllib.request.Request(image_url, None, headers)
@@ -167,3 +166,15 @@ class ThumbnailManager:
                 logging.warning(f"File not found error: {e}. Unable to remove the thumbnail file.")
             except Exception as e:
                 logging.error(f"Error while removing thumbnail: {e}. Unable to remove the thumbnail file.")
+
+    def has_thumbnail(self, image_url: str) -> str | None:
+        """
+        Check if the thumbnail exists for the given image URL in the cache directory.
+        :param image_url:
+        :return: True if the thumbnail exists, False otherwise
+        """
+        hash_id = hashlib.md5(image_url.encode("utf-8")).hexdigest()
+        if hash_id in self.file_names:
+            logging.debug(f"Thumbnail already exists for the image: {image_url}: {self.file_names[hash_id]}")
+            return os.path.join(self.thumbnails_dir, self.file_names[hash_id])
+        return None
