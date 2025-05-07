@@ -11,7 +11,7 @@ from PIL import Image, ImageOps
 import os
 
 USER_AGENT = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
-DEFAULT_SIZE = (200, 200)  # Default size of the thumbnail in pixels
+DEFAULT_SIZE = (400, 400)  # Default size of the thumbnail in pixels
 FILL_COLOR = "#34495e"
 TMP_DIR = '/tmp/'
 ORIGINALS_DIR = 'originals'  # Directory-name to save the original images
@@ -136,6 +136,14 @@ class ThumbnailManager:
         :return: absolute path of the original image file
         """
         hash_id = hashlib.md5(image_url.encode("utf-8")).hexdigest()
+        return self.get_original_image_file_by_hash_id(hash_id)
+
+    def get_original_image_file_by_hash_id(self, hash_id: str) -> Optional[str]:
+        """
+        Get the original image file saved in the cache directory for the given image URL.
+        :param hash_id: hash_id of the image-url
+        :return: absolute path of the original image file
+        """
         filename = self.file_names[hash_id]
         (hash_id, size, ext) = filename.split('.')
         orig_filename = os.path.join(self.originals_dir, '.'.join([hash_id, ext]))
