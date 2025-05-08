@@ -12,7 +12,7 @@ import os
 
 USER_AGENT = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 DEFAULT_SIZE = (400, 400)  # Default size of the thumbnail in pixels
-FILL_COLOR = "#34495e"
+FILL_COLOR = "#ffffff" # Default fill color for the thumbnail background
 TMP_DIR = '/tmp/'
 ORIGINALS_DIR = 'originals'  # Directory-name to save the original images
 THUMBNAILS_DIR = 'thumbnails'  # Directory-name to save the generated thumbnails
