@@ -12,7 +12,7 @@ import os
 
 USER_AGENT = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 DEFAULT_SIZE = (400, 400)  # Default size of the thumbnail in pixels
-FILL_COLOR = "#ffffff" # Default fill color for the thumbnail background
+FILL_COLOR = "#ffffff"  # Default fill color for the thumbnail background
 TMP_DIR = '/tmp/'
 ORIGINALS_DIR = 'originals'  # Directory-name to save the original images
 THUMBNAILS_DIR = 'thumbnails'  # Directory-name to save the generated thumbnails
@@ -64,7 +64,12 @@ class ThumbnailManager:
         :param image_url:
         :return: absolute path of the generated thumbnail file
         """
-        headers = {'User-Agent': USER_AGENT}
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Referer': 'https://magicboxgifts.com'
+        }
 
         # Check if the thumbnail already exists in the cache directory
         path = self.has_thumbnail(image_url)
@@ -77,17 +82,28 @@ class ThumbnailManager:
         try:
             img_request = urllib.request.Request(image_url, None, headers)
             img_response = urllib.request.urlopen(img_request)
+            img_data = img_response.read()
         except urllib.error.HTTPError as e:
-            logging.error(f"HTTP Error: {e.code}. Unable to download image from the URL: {image_url}")
-            return None
+            # if error code is 403, then try to download the image using command wget
+            if e.code == 403:
+                try:
+                    os.system(f"wget -O {os.path.join(TMP_DIR, hash_id)} {image_url} > /dev/null 2>&1")
+                    with open(os.path.join(TMP_DIR, hash_id), 'rb') as f:
+                        img_data = f.read()
+                except Exception as e:
+                    logging.error(f"Error while downloading image using wget: {e}. Unable to download image from the "
+                                  f"URL: {image_url}")
+                    return None
+            else:
+                logging.debug(f"HTTP Error: {e.code}. Unable to download image from the URL: {image_url}")
+                return None
 
         # Save the image data to a temporary file
-        data = img_response.read()
         image_file = os.path.join(self.originals_dir, hash_id) if self.save_original else (
             os.path.join(TMP_DIR, 'tmp_' + hash_id))
         try:
             with open(image_file, 'wb') as f:
-                f.write(data)
+                f.write(img_data)
                 f.close()
         except FileExistsError as e:
             logging.error(f"File exists error: {e}. Unable to write image data to a file {image_file}.")
