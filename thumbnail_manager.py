@@ -83,6 +83,9 @@ class ThumbnailManager:
             img_request = urllib.request.Request(image_url, None, headers)
             img_response = urllib.request.urlopen(img_request)
             img_data = img_response.read()
+        except ValueError as e:
+            logging.error(f"ValueError: {e}. Unable to download image from the URL: {image_url}")
+            return None
         except urllib.error.HTTPError as e:
             # if error code is 403, then try to download the image using command wget
             if e.code == 403:
