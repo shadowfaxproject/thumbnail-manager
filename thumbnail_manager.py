@@ -100,6 +100,9 @@ class ThumbnailManager:
             else:
                 logging.debug(f"HTTP Error: {e.code}. Unable to download image from the URL: {image_url}")
                 return None
+        except urllib.error.URLError as e:
+            logging.error(f"URL Error: {e.reason}. Unable to download image from the URL: {image_url}")
+            return None
 
         # Save the image data to a temporary file
         image_file = os.path.join(self.originals_dir, hash_id) if self.save_original else (
