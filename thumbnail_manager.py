@@ -244,8 +244,11 @@ class ThumbnailManager:
         # Fetch image from image_url
         try:
             img_request = urllib.request.Request(image_url, None, headers)
-            img_response = urllib.request.urlopen(img_request)
+            img_response = urllib.request.urlopen(img_request, timeout=10)
             img_data = img_response.read()
+        except TimeoutError as e:
+            logging.error(f"TimeoutError: {e}. Unable to download image from the URL: {image_url}")
+            return None
         except ValueError as e:
             logging.error(f"ValueError: {e}. Unable to download image from the URL: {image_url}")
             return None
