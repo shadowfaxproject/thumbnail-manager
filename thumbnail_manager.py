@@ -70,7 +70,7 @@ class ThumbnailManager:
                     (hash_id, ext) = filename.split('.')
                     self.original_file_names[hash_id] = filename
                 except ValueError as e:
-                    logging.error(f"ThumbnailManager: Error while reading original file: {e}. Unable to read the "
+                    logging.debug(f"ThumbnailManager: Error while reading original file: {e}. Unable to read the "
                                   f"original file: {filename}")
             logging.info(f"ThumbnailManager: Originals directory: {self.originals_dir}")
 
